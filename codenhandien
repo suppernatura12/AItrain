@@ -1,0 +1,100 @@
+
+import gradio as gr
+import cv2
+import numpy as np
+import tensorflow as tf
+from ultralytics import YOLO
+from PIL import Image
+import os
+
+
+file_model_path = "/content/drive/MyDrive/nhandienCNN.tflite" 
+
+
+
+yolo_model = YOLO("yolov8n.pt")
+
+
+interpreter = tf.lite.Interpreter(model_path=file_model_path)
+interpreter.allocate_tensors()
+input_details = interpreter.get_input_details()
+output_details = interpreter.get_output_details()
+input_shape = input_details[0]['shape']
+
+
+class_names = [
+    "Ca hu kho", "Canh cai", "Canh chua", "Com trang", "Dau hu sot ca",
+    "Ga chien", "Rau muong xao", "Thit kho", "Thit kho trung", "Trung chien"
+]
+
+food_prices = {
+    "Ca hu kho": 20000,
+    "Canh cai": 10000,
+    "Canh chua": 10000,
+    "Com trang": 5000,
+    "Dau hu sot ca": 20000,
+    "Ga chien": 20000,
+    "Rau muong xao": 10000,
+    "Thit kho": 20000,
+    "Thit kho trung": 20000,
+    "Trung chien": 5000
+}
+
+def classify_image(image):
+    results = yolo_model(image)
+    detections = results[0].boxes.data.cpu().numpy()
+    predicted_foods = []
+    total_price = 0
+    for det in detections:
+        x1, y1, x2, y2, confidence, class_id = det
+        class_id = int(class_id)
+
+        if confidence < 0.3:
+            continue
+
+        x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
+        crop = image[y1:y2, x1:x2]
+        if crop.size == 0:
+            continue
+
+        resized = cv2.resize(crop, (input_shape[1], input_shape[2]))
+        input_data = np.expand_dims(resized.astype(np.float32) / 255.0, axis=0)
+
+        interpreter.set_tensor(input_details[0]['index'], input_data)
+        interpreter.invoke()
+        output_data = interpreter.get_tensor(output_details[0]['index'])
+        predicted_index = np.argmax(output_data)
+        predicted_food = class_names[predicted_index]
+
+        predicted_foods.append(predicted_food)
+        total_price += food_prices.get(predicted_food, 0)
+
+    if not predicted_foods:
+        return "Không phát hiện được món ăn", "0đ"
+
+    result_text = "\n".join([f"{food}: {food_prices[food]:,}đ" for food in predicted_foods])
+    total_price_text = f"{total_price:,}đ"
+    return result_text, total_price_text
+
+with gr.Blocks(title="Nhận diện Món Ăn Canteen UEH", theme=gr.themes.Soft()) as demo:
+    gr.Markdown("<h1 style='text-align: center;'>🍜 Nhận diện Món Ăn Canteen UEH (AI Challenges 3ITECH 2025)</h1>")
+    gr.Markdown(f"<h3 style='text-align: center;'>Các món ăn: {', '.join(class_names)}</h3>")
+
+    with gr.Row():
+        with gr.Column():
+            gr.Markdown("📸 Tải lên ảnh mâm cơm:")
+            image_input = gr.Image(type="numpy", label="Ảnh mâm cơm", interactive=True)
+            nhan_dien_button = gr.Button("🔍 Nhận diện và Tính tiền", variant="primary")
+            reload_button = gr.Button("🔄 Tải lại", variant="secondary")
+
+        with gr.Column():
+            gr.Markdown("🌼 Kết quả nhận diện:")
+            food_output = gr.Textbox(label="Các món ăn đã phát hiện", lines=5)
+            total_output = gr.Textbox(label="Tổng tiền", lines=1)
+
+    nhan_dien_button.click(fn=classify_image, inputs=image_input, outputs=[food_output, total_output])
+    reload_button.click(fn=lambda: (None, "", ""), outputs=[
+        image_input, food_output, total_output
+    ])
+
+demo.launch(debug=True, share=True)

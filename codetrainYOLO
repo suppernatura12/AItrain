@@ -1,0 +1,42 @@
+pip install ultralytics
+import yaml
+
+data_yaml = {
+    'train': '/kaggle/input/datafix/Dataset_fix/images/train',
+    'val': '/kaggle/input/datafix/Dataset_fix/images/val',
+    'nc': 10,
+    'names': [
+        'cahukho', 'canhcai', 'canhchua', 'com', 'dauhusotca',
+        'gachien', 'raumuongxao', 'thitkho', 'thitkhotrung', 'trungchien'
+    ]
+}
+
+with open('/kaggle/working/data.yaml', 'w') as f:
+    yaml.dump(data_yaml, f, default_flow_style=False)
+
+print("✅ File data.yaml đã tạo xong tại /kaggle/working/data.yaml")
+from ultralytics import YOLO
+
+model = YOLO('yolov8m.pt')
+
+from ultralytics import YOLO
+
+model = YOLO('yolov8m.pt')
+
+model.train(
+    data='/kaggle/working/data.yaml',
+    epochs=100,  # Tăng số epochs để tận dụng việc tăng cường
+    imgsz=1024,
+    batch=16,
+    name='exp4_augmented',
+    fliplr=0.5,
+    mosaic=1.0,
+    mixup=0.2,
+    scale=0.2,
+    translate=0.2,
+    hsv_h=0.015,
+    hsv_s=0.7,
+    hsv_v=0.4,
+    degrees=10.0,  # Corrected argument name
+    shear=5.0
+)

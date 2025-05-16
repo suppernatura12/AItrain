@@ -140,6 +140,10 @@ plt.show()
 
 
 #code nhan dien
+
+
+
+
 import gradio as gr
 import cv2
 import numpy as np

@@ -9,16 +9,16 @@ from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout, BatchNor
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint, EarlyStopping
 
-# Đường dẫn dữ liệu
+
 train_dir = "/kaggle/input/datafood"
 img_width, img_height = 224, 224
 
-# Tham số huấn luyện
+
 batch_size = 32
 learning_rate = 0.0001
 epochs = 100
 
-# Tạo ImageDataGenerator
+
 train_datagen = ImageDataGenerator(
     rescale=1.0/255,
     width_shift_range=0.2,
@@ -48,7 +48,7 @@ validation_generator = train_datagen.flow_from_directory(
     subset='validation'
 )
 
-# Lưu nhãn
+
 labels_dict = train_generator.class_indices
 labels = [None] * len(labels_dict)
 for label, index in labels_dict.items():
@@ -61,7 +61,7 @@ print(f"Nhãn đã được lưu tại: {labels_path}")
 print(f"Danh sách nhãn: {labels}")
 print(f"img_width: {img_width}, img_height: {img_height}")
 
-# Xây dựng mô hình
+
 model = Sequential([
     Conv2D(32, (3, 3), activation='relu', input_shape=(img_width, img_height, 3)),
     BatchNormalization(),
@@ -86,17 +86,17 @@ model = Sequential([
     Dense(len(train_generator.class_indices), activation="softmax")
 ])
 
-# Compile mô hình
+
 model.compile(optimizer=tf.keras.optimizers.AdamW(learning_rate=learning_rate),
               loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 model.summary()
 
-# Callbacks (chỉ EarlyStopping để đơn giản hóa, bạn có thể thêm ModelCheckpoint nếu muốn)
+
 early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
 
-# Huấn luyện mô hình
+
 history = model.fit(
     train_generator,
     epochs=epochs,
@@ -104,7 +104,7 @@ history = model.fit(
     callbacks=[early_stopping]
 )
 
-# Chuyển đổi và lưu mô hình dưới dạng TFLite
+
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 tflite_model = converter.convert()
 
@@ -114,7 +114,7 @@ with open(tflite_model_path, 'wb') as f:
 
 print(f"\nMô hình đã được huấn luyện và lưu dưới dạng TFLite tại: {tflite_model_path}")
 
-# (Tùy chọn) Hiển thị đồ thị lịch sử huấn luyện
+
 plt.figure(figsize=(12, 6))
 plt.subplot(1, 2, 1)
 plt.plot(history.history['accuracy'], label='Train Accuracy')

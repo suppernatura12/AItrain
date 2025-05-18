@@ -3,7 +3,7 @@
 
 ## Tổng quan về dự án
 
-Dự án này đề xuất một hệ thống trí tuệ nhân tạo có khả năng tự động nhận diện các món ăn được lựa chọn trên khay tại quầy thanh toán của căn tin thông qua phân tích hình ảnh, từ đó xác định và ánh xạ giá tiền tương ứng từ cơ sở dữ liệu thực đơn. [cite: 10] Mục tiêu của dự án là giảm thiểu thời gian giao dịch thanh toán, nâng cao độ chính xác trong việc nhận diện món ăn và tính toán chi phí, cung cấp một phương thức thanh toán hiện đại và tiện lợi, cũng như tạo cơ sở dữ liệu về thông tin bán hàng. [cite: 11, 12, 13, 14]
+Dự án này đề xuất một hệ thống trí tuệ nhân tạo có khả năng tự động nhận diện các món ăn được lựa chọn trên khay tại quầy thanh toán của căn tin thông qua phân tích hình ảnh, từ đó xác định và ánh xạ giá tiền tương ứng từ cơ sở dữ liệu thực đơn. Mục tiêu của dự án là giảm thiểu thời gian giao dịch thanh toán, nâng cao độ chính xác trong việc nhận diện món ăn và tính toán chi phí, cung cấp một phương thức thanh toán hiện đại và tiện lợi, cũng như tạo cơ sở dữ liệu về thông tin bán hàng.
 
 ## Hướng dẫn cài đặt
 
@@ -27,7 +27,7 @@ Dự án này đề xuất một hệ thống trí tuệ nhân tạo có khả n
  Hướng dẫn sử dụng
 
 1.  Thu thập ảnh: Đặt khay thức ăn dưới camera. 
-2.  Kích hoạt hệ thống: Nhấn nút (nếu có) để chụp ảnh khay thức ăn. 
+2.  Kích hoạt hệ thống: Nhấn nút để chụp ảnh khay thức ăn. 
 3.  Xử lý ảnh: Hệ thống sẽ tự động nhận diện các món ăn và tính toán tổng tiền. 
 4.  Hiển thị kết quả: Thông tin về các món ăn và tổng giá tiền sẽ hiển thị trên màn hình máy tính. 
 

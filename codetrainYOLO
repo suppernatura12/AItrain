@@ -17,15 +17,15 @@ with open('/kaggle/working/data.yaml', 'w') as f:
 print("✅ File data.yaml đã tạo xong tại /kaggle/working/data.yaml")
 from ultralytics import YOLO
 
-model = YOLO('yolov8m.pt')
+model = YOLO('yolov8n.pt')
 
 from ultralytics import YOLO
 
-model = YOLO('yolov8m.pt')
+model = YOLO('yolov8n.pt')
 
 model.train(
     data='/kaggle/working/data.yaml',
-    epochs=100,  # Tăng số epochs để tận dụng việc tăng cường
+    epochs=100,  
     imgsz=1024,
     batch=16,
     name='exp4_augmented',
@@ -37,6 +37,6 @@ model.train(
     hsv_h=0.015,
     hsv_s=0.7,
     hsv_v=0.4,
-    degrees=10.0,  # Corrected argument name
+    degrees=10.0,  
     shear=5.0
 )

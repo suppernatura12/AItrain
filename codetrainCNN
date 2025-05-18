@@ -109,8 +109,8 @@ history = model.fit(
 )
 
 
-model.save("model12.h5")
-print("\nmodel12.h5")
+model.save("model18.h5")
+print("\nmodel18.h5")
 
 
 

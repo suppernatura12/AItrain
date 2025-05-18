@@ -17,11 +17,11 @@ with open('/kaggle/working/data.yaml', 'w') as f:
 print("✅ File data.yaml đã tạo xong tại /kaggle/working/data.yaml")
 from ultralytics import YOLO
 
-model = YOLO('yolov8n.pt')
+model = YOLO('yolov8l.pt')
 
 from ultralytics import YOLO
 
-model = YOLO('yolov8n.pt')
+model = YOLO('yolov8l.pt')
 
 model.train(
     data='/kaggle/working/data.yaml',

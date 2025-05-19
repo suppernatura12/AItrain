@@ -6,65 +6,63 @@ from ultralytics import YOLO
 from PIL import Image
 import os
 
-# Đường dẫn đến các model và file dữ liệu
+
 yolo_model_path = "/kaggle/input/modelchinh/other/default/1/model23.pt"
 keras_model_path = "/kaggle/input/modelchinh/other/default/1/model9.h5"
-output_dir = "detected_foods"  # Thư mục để lưu ảnh các món ăn đã cắt
+output_dir = "detected_foods"
 
-# Tải các model
+
 yolo_model = YOLO(yolo_model_path)
 keras_model = tf.keras.models.load_model(keras_model_path)
-input_shape = keras_model.input_shape[1:3]  # Lấy kích thước input của model Keras
+input_shape = keras_model.input_shape[1:3]
 
-# Danh sách tên các lớp món ăn
+
 class_names = [
-    "Ca hu kho", "Canh cai", "Canh chua", "Com trang", "Dau hu sot ca",
-    "Ga chien", "Rau muong xao", "Thit kho", "Thit kho trung", "Trung chien"
+    'cahukho', 'canhcai', 'canhchua', 'com trang', 'dauhusotca',
+    'gachien', 'raumuongxao', 'thitkho', 'thitkhotrung', 'trungchien'
 ]
 
-# Bảng giá các món ăn
 food_prices = {
-    "Ca hu kho": 20000,
-    "Canh cai": 10000,
-    "Canh chua": 10000,
-    "Com trang": 5000,
-    "Dau hu sot ca": 20000,
-    "Ga chien": 20000,
-    "Rau muong xao": 10000,
-    "Thit kho": 20000,
-    "Thit kho trung": 20000,
-    "Trung chien": 5000
+    'cahukho': 20000,
+    'canhcai': 10000,
+    'canhchua': 10000,
+    'com trang': 5000,
+    'dauhusotca': 20000,
+    'gachien': 20000,
+    'raumuongxao': 10000,
+    'thitkho': 20000,
+    'thitkhotrung': 20000,
+    'trungchien': 5000
 }
 
-# Đảm bảo thư mục lưu ảnh đã cắt tồn tại
+
 os.makedirs(output_dir, exist_ok=True)
+food_history = []
+
 
 def classify_image(image):
     results = yolo_model(image)
     detections = results[0].boxes.data.cpu().numpy()
     predicted_foods = []
     total_price = 0
+    cropped_images = []
 
     for i, det in enumerate(detections):
         x1, y1, x2, y2, confidence, class_id = det
         class_id = int(class_id)
 
-        # Lọc bỏ các phát hiện có độ tin cậy thấp
-        if confidence < 0.3:
+        if confidence < 0.2:
             continue
 
         x1, y1, x2, y2 = map(int, [x1, y1, x2, y2])
         crop = image[y1:y2, x1:x2]
 
-        # Kiểm tra kích thước crop để tránh lỗi
         if crop.size == 0:
             continue
 
-        # Lưu ảnh của từng món ăn đã phát hiện
         food_filename = os.path.join(output_dir, f"food_{i}.jpg")
-        cv2.imwrite(food_filename, cv2.cvtColor(crop, cv2.COLOR_RGB2BGR)) # Lưu dưới dạng BGR
+        cv2.imwrite(food_filename, cv2.cvtColor(crop, cv2.COLOR_RGB2BGR))
 
-        # Tiền xử lý và nhận dạng từng món ăn đã cắt
         resized = cv2.resize(crop, input_shape)
         input_data = np.expand_dims(resized.astype(np.float32) / 255.0, axis=0)
         predictions = keras_model.predict(input_data)
@@ -73,14 +71,19 @@ def classify_image(image):
 
         predicted_foods.append(predicted_food)
         total_price += food_prices.get(predicted_food, 0)
+        cropped_images.append(Image.fromarray(crop))
 
     if not predicted_foods:
-        return "Không nhận diện được món ăn nào.", "0đ"
+        return "Không nhận diện được món ăn nào.", "0đ", "\n".join(food_history), []
 
-    # Tạo chuỗi kết quả hiển thị các món ăn và tổng tiền
     result_text = "\n".join([f"{food}: {food_prices.get(food, 'Không rõ giá'):,}đ" for food in predicted_foods])
     total_price_text = f"{total_price:,}đ"
-    return result_text, total_price_text
+
+    food_history.append(f"{result_text} → Tổng: {total_price_text}")
+    history_text = "\n\n".join(food_history)
+
+    return result_text, total_price_text, history_text, cropped_images
+
 
 with gr.Blocks(title="Nhận diện Món Ăn Canteen UEH", theme=gr.themes.Soft()) as demo:
     gr.Markdown("<h1 style='text-align: center;'>🍜 Nhận diện Món Ăn Canteen UEH (AI Challenges 3ITECH 2025)</h1>")
@@ -93,14 +96,25 @@ with gr.Blocks(title="Nhận diện Món Ăn Canteen UEH", theme=gr.themes.Soft(
             nhan_dien_button = gr.Button("🔍 Nhận diện và Tính tiền", variant="primary")
             reload_button = gr.Button("🔄 Tải lại", variant="secondary")
 
+            gr.Markdown("🖼️ Món ăn đã cắt:")
+            gallery_output = gr.Gallery(label="Ảnh món ăn", show_label=True, columns=3, height="auto")
+
         with gr.Column():
             gr.Markdown("🌼 Kết quả nhận diện:")
-            food_output = gr.Textbox(label="Các món ăn đã phát hiện (và giá):", lines=5)
+            food_output = gr.Textbox(label="Các món ăn:", lines=5)
             total_output = gr.Textbox(label="Tổng tiền:", lines=1)
+            gr.Markdown("📜 Lịch sử nhận diện:")
+            history_output = gr.Textbox(label="Lịch sử món ăn:", lines=10, interactive=False)
 
-    nhan_dien_button.click(fn=classify_image, inputs=image_input, outputs=[food_output, total_output])
-    reload_button.click(fn=lambda: (None, "", ""), outputs=[
-        image_input, food_output, total_output
-    ])
+    nhan_dien_button.click(
+        fn=classify_image,
+        inputs=image_input,
+        outputs=[food_output, total_output, history_output, gallery_output]
+    )
+
+    reload_button.click(
+        fn=lambda: (None, "", "", "", []),
+        outputs=[image_input, food_output, total_output, history_output, gallery_output]
+    )
 
 demo.launch(debug=True, share=True)

@@ -7,7 +7,7 @@ from PIL import Image
 import os
 
 
-yolo_model_path = "/kaggle/input/modelchinh/other/default/1/model23.pt"
+yolo_model_path = "/kaggle/input/modelchinh/other/default/1/yolov8n.pt"
 keras_model_path = "/kaggle/input/modelchinh/other/default/1/model9.h5"
 output_dir = "detected_foods"
 

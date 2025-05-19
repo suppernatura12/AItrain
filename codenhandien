@@ -7,8 +7,8 @@ from PIL import Image
 import os
 
 # Đường dẫn đến các model và file dữ liệu
-yolo_model_path = "/kaggle/input/modeld/other/default/1/best.pt"
-keras_model_path = "/kaggle/input/model18/other/default/1/model12.h5"
+yolo_model_path = "/kaggle/input/modelchinh/other/default/1/model23.pt"
+keras_model_path = "/kaggle/input/modelchinh/other/default/1/model9.h5"
 output_dir = "detected_foods"  # Thư mục để lưu ảnh các món ăn đã cắt
 
 # Tải các model

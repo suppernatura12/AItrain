@@ -1,5 +1,4 @@
-drive:
-https://drive.google.com/file/d/1Cit3S7fSRxmR3YSz17MT44FtlvIcrdly/view?usp=drive_link
+
 
 pip install ultralytics
 import yaml
